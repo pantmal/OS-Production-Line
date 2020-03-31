@@ -1,0 +1,29 @@
+
+The program works as follows: We use a for loop to create 8 processes. Each time it calls fork to create a process. 
+If we are on the first loop we will do stuff for the first process, the second loop will do stuff for the second process and so on.
+A constructor processer creates its part and if the Shared Memory is empty it writes to it so the painter will read, otherwise it waits.
+The painter process will read the part when a constructor process has written something. After that, it writes to second shared memory so the checkers may read the part.
+The checkers read the part when the painter has written it, and after that they write to the third shared memory so the assembler will read the part. Also, a checker process is blocked from writing multiple parts of the same type. It may resume only when a product is ready. 
+The assembler reads a part when a checker process has written it. When it has taken three parts of each type it adds them to create the final product. When a product has been completed it lets the checkers processes write to the third shared memory again. Also after all products are completed the assembler calculates the average times the exercise needs.
+
+The father process simply waits for the children processes to finish.
+
+Three Shared Memories were used. One between each stage.
+
+Fifteen Semaphores were used.
+Three are used for each shared memory. One Empty, one Full and one Mutex. Based on the bounded buffer problem, a writer process may write only when the shared memory is empty. After it has finished writing it signals the reader processes that may read the shared memory segment. So, a reader process reads only when the shared memory is full and after it has read the segment it signals the writer processes that they may write. Mutex is used to ensure that other processes that may be ready will not intervene.
+Three Checker Semaphores are used in order for every checker to read parts of its type. So when the painter has written a part of type 1 it will signal the checker 1 process to unblock so it may read the part. Same thing for types 2 and 3.
+Finally 3 Complete semaphores are used in order to prevent a checker process from writing multiple parts of the same type to the last shared memory. This semaphore is decremented when a checker process writes something. It is incremented by the assembler process when it has completed a product. This way the assembler will take only one type of part at a time. When the product is ready the checker processes may continue.
+
+Regarding the average times, timespec was used to calculate the neccesary times. For the first average time, we get the creation time when a part is created as well as the time it reaches the painter (meaning right before writing to the first shared memory). This elapsed time is added to a sum which is carried throughout all the processes through the shared memories and divided by 3Y after the assembler process has finished all of its other works. For the second average time, we carry the creation time of all three part types. When a product is finished we get how much time it took to be completed. Then we get through a function, which creation time was the smallest one. We subtract the smallest creation time from the end time of a product and the result is added to a sum. After all products have been completed this sum is divided by Y. 
+
+The nanosleep function was used to make processes run for a certain amount of ms.
+
+To run the program type: 
+
+make
+./main Y (Y is how many products we want to create)
+
+The output is every product with its parts as well as the two average times. 
+
+
